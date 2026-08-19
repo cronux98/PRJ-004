@@ -1,0 +1,56 @@
+{
+  "project": "PRJ-004 (NEW) — Stage 0 Business Analysis",
+  "generated_by": "business-analyst (deepseek-v4-flash)",
+  "date": "2026-08-19",
+  "purpose": "PPA + economics baselines scaled to SkyWater 130nm (sky130A) used by candidates A/B/C feasibility and unit-economics dimensions. Every number carries a source + tier; estimates are labeled.",
+  "process": {
+    "node": "SKY130A (open PDK, SkyWater+Google, 13-metal, 1.8V core / 3.3V IO)",
+    "pdk_source": "https://skywater-pdk.readthedocs.io/ [T1]"
+  },
+  "cpu_baselines": [
+    {"block": "Ibex RV32IMC", "fmax_mhz": 100, "area_kge": 25, "source": "IP index ip/lowrisc-ibex.md (T1)", "use": "candidates A, B"},
+    {"block": "cv32e40p", "fmax_mhz": 100, "area_kge": 40, "source": "IP index ip/openhw-cv32e40p.md (T1)", "use": "candidate C"},
+    {"block": "NEORV32", "fmax_mhz": 50, "area_kge": 10, "source": "IP index ip/stnolting-neorv32.md (T1)", "use": "fallback"},
+    {"block": "Caravel-class SoC (PicoRV32)", "fmax_mhz": 50, "area_mm2": 11.8, "note": "user area 3.1x3.8mm", "source": "foss-eda-tools MPW docs (T1) + hackster (T3)"}
+  ],
+  "memory_baselines": [
+    {"block": "sky130B SRAM macros", "sizes": ["1kB (32x256 / 8x1024)", "2kB (32x512)"], "source": "vlsi.jp OpenMPW SRAM guide (T3)"},
+    {"block": "OpenRAM SRAM compiler", "sizes": "1kB-64kB demonstrated in MPW projects", "source": "IP index ip/vlsida-openram.md (T1) + vlsi.jp (T3)"},
+    {"plan": "Per-candidate SRAM: A=32kB, B=32kB, C=64kB (dual-bank)", "source": "scaled from IP index OpenRAM entry + sky130 macro sizes"}
+  ],
+  "analog_baselines": [
+    {"block": "PLL", "availability": "sky130 analog primitives; open MPW PLL designs exist", "spec_plan": "24MHz xtal -> 50-100MHz system clock", "source": "skywater-pdk.readthedocs.io (T1); MPW analog community (T5)", "tier": "T1/T5"},
+    {"block": "LDO / power", "availability": "sky130 analog primitives", "source": "skywater-pdk.readthedocs.io (T1)"},
+    {"block": "SAR ADC 12-bit", "availability": "designable on sky130 (charge-redistribution SAR)", "spec_plan": "A: 8ch 12-bit 100kSPS; B: 4ch 12-bit 50kSPS; C: 2x 16-bit oversampled metering path", "source": "skywater-pdk (T1); analog-on-sky130 community (T5)", "tier": "T1/T5"},
+    {"block": "Comparator", "availability": "sky130 analog primitives", "use": "A: wake-on-water-level threshold; C: CP (control pilot) level detect", "source": "skywater-pdk.readthedocs.io (T1)"},
+    {"block": "RF front-end (433/915MHz FSK)", "availability": "NOT proven on sky130 in open literature; hypothesis", "fallback": "external RF front-end/module (e.g., commodity SX1262-class), in-house digital baseband + packet engine is the CREATE core", "source": "labeled hypothesis (T5); SDR-LoRa shows PHY algorithms exist (T2)"},
+    {"block": "RF front-end (2.4GHz GFSK/BLE)", "availability": "NOT proven on sky130; high risk", "fallback": "external BLE RF front-end; in-house GFSK baseband + link layer", "source": "labeled hypothesis (T5); Nordic nRF52840 as commercial baseline (T1)"}
+  ],
+  "ppa_estimates": [
+    {"metric": "SoC gate count (A: MCU+sensor AFE+radio baseband)", "value_kge": "80-120", "tier": "T5 estimate", "note": "25kGE CPU + 32kB SRAM (~45kGE equiv) + peripherals + radio baseband"},
+    {"metric": "SoC gate count (B: MCU+BLE baseband+DSP accel)", "value_kge": "90-130", "tier": "T5 estimate"},
+    {"metric": "SoC gate count (C: MCU+CAN+metrology+display)", "value_kge": "100-140", "tier": "T5 estimate"},
+    {"metric": "Die area (all candidates)", "value_mm2": "9-12 (3x3 to 3.1x3.8mm user area)", "tier": "T1 anchored (Caravel slot 3.1x3.8mm)"},
+    {"metric": "System clock", "value_mhz": "50-100", "tier": "T1/T3 (Ibex 100MHz claim; Caravel-class 50MHz demonstrated)"},
+    {"metric": "Active power (MCU-class, 50MHz)", "value": "~5-15 mW core digital", "tier": "T5 estimate"},
+    {"metric": "Sleep power target (RTC + wake logic)", "value": "<10 uA @ 1.8V (A), <20 uA (B), <50 uA (C)", "tier": "T5 target — design budget, not measured"}
+  ],
+  "economics_baselines": [
+    {"item": "Prototype: Efabless chipIgnite (SKY130, full SoC)", "cost_usd": 9750, "tier": "T1 (chipfoundry.io FAQ) + T3 (embedded.com)", "use": "all candidates, first silicon"},
+    {"item": "Prototype: Google-sponsored open MPW shuttle", "cost_usd": 0, "tier": "T1 (opensource.googleblog.com)", "use": "all candidates, if design published open-source"},
+    {"item": "Volume die cost 130nm, 2x2mm die, mature wafer pricing", "cost_usd": "1-3 per die at 100k+ units", "tier": "T5 estimate (industry rule-of-thumb; no public sky130 wafer price)", "note": "cross-check: chipIgnite $9,750 for ~10 packaged dies (T1)"},
+    {"item": "Packaging + test (QFN48-class)", "cost_usd": "0.5-1.5", "tier": "T5 estimate"},
+    {"item": "Module/board BOM budget for <RM150 retail", "cost_rm": "<= 80 (SoC <= RM20, sensors 10-30, power 8-15, radio FE 0-15, PCB+enclosure 20-30)", "tier": "T1/T5 (RAK module prices T1; JSN-SR04T Shopee T5; nRF module class T1)"},
+    {"item": "Retail price ceiling (hard requirement)", "cost_rm": "< 150", "tier": "owner requirement"},
+    {"item": "Typical gross margin at RM129-149 retail with RM70-80 BOM", "pct": "40-50", "tier": "computed from BOM model"},
+    {"item": "SIRIM Type Approval (radio device)", "cost_rm": "~3,000-8,000 + 2-6 months", "tier": "T3 (broadband.com.my guide) — check current fees at certification", "use": "all candidates with radio"}
+  ],
+  "field_corroboration": [
+    {"claim": "Caravel-class sky130 SoCs run 50MHz with ~12mm2 user area", "evidence": "MPW-001 slot docs (T1); hackster Caravel overview (T3)"},
+    {"claim": "1-2kB SRAM macros ship with PDK; OpenRAM generates up to 64kB", "evidence": "vlsi.jp (T3); IP index OpenRAM (T1)"},
+    {"claim": "Analog (PLL/LDO/ADC/comparator) designable on sky130", "evidence": "SkyWater PDK docs (T1); analog MPW community (T5)"},
+    {"claim": "USD 9,750 full-SoC prototype on sky130", "evidence": "chipfoundry.io FAQ (T1); embedded.com (T3)"},
+    {"claim": "Commercial flood sensor nodes cost USD 234-504", "evidence": "RAK store (T1); MCCI/Milesight (T1)"},
+    {"claim": "Commercial BLE SoC baseline = nRF52840 (feature reference for candidate B)", "evidence": "nordicsemi.com (T1)"}
+  ]
+}

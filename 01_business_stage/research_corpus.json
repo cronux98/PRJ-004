@@ -1,0 +1,105 @@
+{
+  "project": "PRJ-004 (NEW) — Stage 0 Business Analysis: 3 Candidate SoC Ideas for Malaysia",
+  "model": "deepseek-v4-flash",
+  "method": "plan -> research -> learn -> recurse -> publish -> self-validate (business-analyst-v2, Comprehensive mode: breadth 6-8 q/level, depth 3 levels on competitive + inversion axes)",
+  "research_window": "2026-08-19 (live web research; sources dated 2019-2026)",
+  "source_tiers": {
+    "T1": "vendor / silicon-proven / IP-index / official statistics & govt portals — weight 1.0",
+    "T2": "peer-reviewed / standards / national news agencies citing official data — weight 0.9",
+    "T3": "reputable secondary (trade press, consultancies, established tech media) — weight 0.6",
+    "T4": "vendor PR / marketing / blogs — weight 0.4",
+    "T5": "community / forums / unverified — weight 0.25"
+  },
+  "sources": [
+    {"id": "S01", "claim": "Dec 2021 Malaysia floods: RM6.1B total losses (0.4% of GDP), 11 states, 60 districts; Selangor worst hit (Klang RM1.2B, Petaling RM1.1B, Hulu Langat RM400M)", "url": "https://www.channelnewsasia.com/asia/malaysia-floods-2021-2022-losses-statistics-department-2465656", "publisher": "CNA (citing DOSM Special Report)", "tier": "T2", "used_in": ["A-domain", "A-market", "A-timing"]},
+    {"id": "S02", "claim": "Dec 2021 floods: ~50 dead, ~400,000 evacuated, RM6.1B loss estimate", "url": "https://www.iseas.edu.sg/articles-commentaries/iseas-perspective/2022-26-malaysias-floods-of-december-2021-can", "publisher": "ISEAS Perspective 2022/26", "tier": "T2", "used_in": ["A-timing", "A-inversion"]},
+    {"id": "S03", "claim": "DOSM Special Report on Impact of Floods in Malaysia 2021 — RM6.1B official figure", "url": "https://www.dosm.gov.my/portal-main/release-content/special-report-on-impact-of-floods-in-malaysia-2021", "publisher": "DOSM (official)", "tier": "T1", "used_in": ["A-market", "A-timing"]},
+    {"id": "S04", "claim": "Malaysia 2024 flood losses: RM933.4M (DOSM Special Report, published 19 Mar 2025)", "url": "https://www.dosm.gov.my/portal-main/release-document-log?release_document_id=13667", "publisher": "DOSM (official)", "tier": "T1", "used_in": ["A-market", "A-timing"]},
+    {"id": "S05", "claim": "2025 flood losses dropped to RM636.9M from RM933.4M in 2024 (0.03% of GDP)", "url": "https://www.bernama.com/tv/news.php/news.php?id=2545191", "publisher": "Bernama (national news agency, DOSM figures)", "tier": "T2", "used_in": ["A-market", "A-timing"]},
+    {"id": "S06", "claim": "2025 NE-monsoon floods: 8 fatalities since Nov, rising economic cost — World Bank warns of escalating flood-related losses", "url": "https://www.eco-business.com/news/as-malaysia-grapples-with-flood-related-losses-world-bank-warns-of-rising-ec", "publisher": "Eco-Business (World Bank comment)", "tier": "T2", "used_in": ["A-timing", "A-inversion"]},
+    {"id": "S07", "claim": "KL early flood warning sirens operated by JPS; community alerting exists but is coarse (area-level siren, not per-community)", "url": "https://www.nadma.gov.my/bi/media-en/news/5991-when-sirens-call-how-kl-s-early-flood-warning-system-works-and-", "publisher": "NADMA portal (republish of Malay Mail)", "tier": "T2", "used_in": ["A-competitive", "A-gap"]},
+    {"id": "S08", "claim": "National Flood Forecasting and Warning System (NaFFWS) rolling out phase-wise for key river basins; 48h-1 week forecasts at basin level", "url": "https://link.springer.com/chapter/10.1007/978-981-15-1971-0_27", "publisher": "Springer (peer-reviewed chapter)", "tier": "T2", "used_in": ["A-competitive", "A-gap"]},
+    {"id": "S09", "claim": "National Flood Forecasting and Warning Centre (PRABN) operates hydrometric telemetry network under JPS", "url": "https://www.water.gov.my/index.php/pages/view/1956?mid=678", "publisher": "JPS/water.gov.my (official)", "tier": "T1", "used_in": ["A-competitive"]},
+    {"id": "S10", "claim": "Commercial LoRaWAN water-level sensor (RAK): USD 233.90-254.20 per unit", "url": "https://store.rakwireless.com/products/water-level-monitoring", "publisher": "RAKwireless store (vendor price)", "tier": "T1", "used_in": ["A-competitive", "A-unit-econ"]},
+    {"id": "S11", "claim": "Milesight EM500-SWL submersible level sensor: USD ~504", "url": "https://store.mcci.com/products/milesight-uc500-swl-submersible-water-level-sensor", "publisher": "MCCI store (vendor price)", "tier": "T1", "used_in": ["A-competitive"]},
+    {"id": "S12", "claim": "Alibaba LoRaWAN level sensors: USD 70-415 (low-end supply exists)", "url": "https://www.alibaba.com/showroom/lorawan-water-level-sensor.html", "publisher": "Alibaba (marketplace)", "tier": "T4", "used_in": ["A-competitive", "A-inversion"]},
+    {"id": "S13", "claim": "Peer-reviewed LoRaWAN-based smart sensing unit for flood monitoring built for Malaysian conditions (2023)", "url": "https://www.sciencedirect.com/science/article/pii/S2667345223000263", "publisher": "ScienceDirect (Results in Engineering)", "tier": "T2", "used_in": ["A-competitive", "A-feasibility"]},
+    {"id": "S14", "claim": "Malaysia to become ageing nation by 2030: 60+ population surpasses 15% (DOSM projection 2010-2040); 2.6M aged 65+ = 7.7% of 34.1M in 2024", "url": "https://www.malaymail.com/news/malaysia/2024/07/31/malaysia-set-to-become-ageing-nation-by-2030-perak-leads-se", "publisher": "Malay Mail (DOSM figures)", "tier": "T2", "used_in": ["B-market", "B-timing"]},
+    {"id": "S15", "claim": "Aged 60+ = 7.9% in 2010, projected 15.3% by 2030 (DOSM 2016) — one of fastest ageing nations in 20 years", "url": "https://mprh.lppkn.gov.my/ageing-phenomenon-malaysia-towards-2030/", "publisher": "MPRH (govt research hub, DOSM data)", "tier": "T1", "used_in": ["B-market", "B-timing"]},
+    {"id": "S16", "claim": "Malaysia to become aged nation by 2048 (65+ >20% definition, DOSM figures via Finance Minister), population 34.2M in 2025", "url": "https://mof.gov.my/portal/en/news/press-citations/malaysia-to-become-aged-nation-by-2048-amir-hamzah", "publisher": "MOF (official)", "tier": "T1", "used_in": ["B-market", "B-timing"]},
+    {"id": "S17", "claim": "Malaysia patient monitoring device market USD 403.28M (2024) -> USD 647.64M (2032), CAGR 6.1%", "url": "https://www.stellarmr.com/report/Malaysia-Patient-Monitoring-Device-Market/1671", "publisher": "Stellar Market Research", "tier": "T4", "used_in": ["B-market"]},
+    {"id": "S18", "claim": "Fall-detection watch quality price band USD 100-200", "url": "https://seniorsmobility.org/living-room-essentials-for-elderly/wearables/best-fall-detection-watch/", "publisher": "SeniorsMobility (reviews)", "tier": "T3", "used_in": ["B-competitive", "B-unit-econ"]},
+    {"id": "S19", "claim": "Malaysia digital health: MOH mandated national FHIR-based Health Information Network (HIN) since 2022; digital-health policy lineage 1985-2025", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12227897/", "publisher": "PMC peer-reviewed narrative review", "tier": "T2", "used_in": ["B-timing", "B-regulatory"]},
+    {"id": "S20", "claim": "Malaysian elderly-monitoring competitors exist: CorriCare (MY), SmartPeep (SG/AU/MY AI fall detection), I'm Alive (MY check-in app), Intedriatt (MY)", "url": "https://www.corricare.com.my/", "publisher": "CorriCare (vendor)", "tier": "T4", "used_in": ["B-competitive"]},
+    {"id": "S21", "claim": "2024 TIV: 14,766 BEV + 30,796 hybrids registered (MAA Market Review 2024)", "url": "https://www.maa.org.my/pdf/2024/Market_Review_2024.pdf", "publisher": "MAA (industry association, official)", "tier": "T1", "used_in": ["C-market", "C-timing"]},
+    {"id": "S22", "claim": "46,403 xEV (EV+hybrid+BEV) units sold in 2024 (MITI, Dewan Rakyat)", "url": "https://www.thestar.com.my/news/nation/2025/08/18/nearly-47000-ev-hybrid-bev-units-sold-in-2024-says-miti", "publisher": "The Star (MITI figures)", "tier": "T2", "used_in": ["C-market"]},
+    {"id": "S23", "claim": "BYD 39.33% (8,570 units), Tesla 23.58% (5,137) of 2024 EV registrations (JPJ data)", "url": "https://soyacincau.com/2025/01/08/malaysia-jpj-ev-registration-january-to-december-2024/", "publisher": "SoyaCincau (JPJ data)", "tier": "T3", "used_in": ["C-market"]},
+    {"id": "S24", "claim": "Low Carbon Mobility Blueprint: 10,000 public charge points by end-2025 (9,000 AC, 1,000 DC); at end-2024 Malaysia had only 3,600; +153% in 2024; 30% DC share", "url": "https://www.rolandberger.com/en/Insights/Publications/EV-Charging-Index-2025-Expert-insight-from-Malaysia.html", "publisher": "Roland Berger EV Charging Index 2025", "tier": "T2", "used_in": ["C-market", "C-timing"]},
+    {"id": "S25", "claim": "AC 7kW home charger RM3,000-5,900; 22kW more; Type 2 connector standard in Malaysia", "url": "https://www.mgmalaysia.com/2024/07/31/calculating-ev-charging-costs-in-malaysia/", "publisher": "MG Malaysia (vendor blog)", "tier": "T4", "used_in": ["C-market", "C-unit-econ"]},
+    {"id": "S26", "claim": "Home EV charger installed from RM2,800; most pay RM4,500-7,000", "url": "https://trexon.my/blog/ev-charger-malaysia-2026-home-commercial-guide", "publisher": "Trexon (vendor guide)", "tier": "T4", "used_in": ["C-market"]},
+    {"id": "S27", "claim": "NETR: net-zero by 2050 ambition, 45% GHG-intensity cut by 2030 vs 2005, low-carbon mobility is a core lever", "url": "https://www.pwc.com/my/en/assets/publications/2023/PwC-my-Summary-of-the-National-Energy-Transition-Roadmap.pd", "publisher": "PwC summary of NETR (official roadmap)", "tier": "T2", "used_in": ["C-timing"]},
+    {"id": "S28", "claim": "OCPP is the open standard for EVSE<->CSMS comms (OCA-managed); OCPP 1.6 baseline, 2.0.1 adds security", "url": "https://www.chargepanel.com/ocpp-1-6-vs-ocpp-2-0-1-keydifferencesupdates-and-functionality/", "publisher": "ChargePanel (OCA ecosystem)", "tier": "T3", "used_in": ["C-competitive", "C-feasibility"]},
+    {"id": "S29", "claim": "chipIgnite: commercial SoC prototype on SKY130 for ~USD 9,750; Google-sponsored MPW shuttles free for open designs", "url": "https://chipfoundry.io/faqs", "publisher": "Efabless (vendor FAQ)", "tier": "T1", "used_in": ["feasibility-common", "A/B/C-unit-econ"]},
+    {"id": "S30", "claim": "chipIgnite SoC for $9,750 in SkyWater 130nm (trade press corroboration)", "url": "https://www.embedded.com/efabless-chipignite-enables-soc-for-9750-in-skywater-cmos-node/", "publisher": "Embedded.com", "tier": "T3", "used_in": ["feasibility-common"]},
+    {"id": "S31", "claim": "Google sponsors open-source IC manufacturing at no cost (MPW program with Efabless)", "url": "https://opensource.googleblog.com/2022/05/Build+Open+Silicon+with+Google.html", "publisher": "Google Open Source Blog", "tier": "T1", "used_in": ["feasibility-common"]},
+    {"id": "S32", "claim": "Caravel user area ~3.1mm x 3.8mm, 37 IO pads + 10 power pads; Caravel-class SoCs run ~50MHz with PicoRV32", "url": "https://foss-eda-tools.googlesource.com/third_party/shuttle/sky130/mpw-001/slot-019/", "publisher": "Google FOSSi EDA tools repo (MPW slot docs)", "tier": "T1", "used_in": ["feasibility-common"]},
+    {"id": "S33", "claim": "sky130B PDK ships SRAM macros: 1kB (32x256 / 8x1024) and 2kB (32x512); OpenRAM used across MPW projects", "url": "https://vlsi.jp/OpenMPWSRAM_eng.html", "publisher": "vlsi.jp (open-source EDA practitioner)", "tier": "T3", "used_in": ["feasibility-common", "A/B/C-feasibility"]},
+    {"id": "S34", "claim": "SKY130 PDK is fully open (SkyWater+Google), includes analog device models & primitives (sky130_fd_pr etc.) enabling PLL/LDO/ADC design", "url": "https://skywater-pdk.readthedocs.io/", "publisher": "SkyWater PDK docs (official)", "tier": "T1", "used_in": ["feasibility-common", "A/B/C-feasibility"]},
+    {"id": "S35", "claim": "Open-source wireless RTL gap: no production-grade pure-Verilog BLE or LoRa PHY/transceiver; only GNU Radio/SDR software implementations exist (gr-lora_sdr, SDR-LoRa)", "url": "https://www.sciencedirect.com/science/article/pii/S1389128624000264", "publisher": "Computer Networks (SDR-LoRa paper)", "tier": "T2", "used_in": ["A/B-IP", "differentiation-common"]},
+    {"id": "S36", "claim": "nRF52840 (Nordic) is the reference BLE SoC — commercial baseline for wearables; module BOM costs dominate device price", "url": "https://www.nordicsemi.com/Products/nRF52840", "publisher": "Nordic Semiconductor (vendor)", "tier": "T1", "used_in": ["B-competitive", "B-unit-econ"]},
+    {"id": "S37", "claim": "SIRIM Type Approval mandatory for radio/telecom equipment in Malaysia (MCMC label); Mode B 2-6 months incl. factory audit", "url": "https://www.broadband.com.my/guides/sirim-type-approval-checklist/", "publisher": "Broadband.com.my guide", "tier": "T3", "used_in": ["A/B/C-regulatory"]},
+    {"id": "S38", "claim": "NIMP 2030 + National Semiconductor Strategy: Malaysia targets moving from packaging into IC design & manufacturing (RM120B+ E&E ambitions)", "url": "https://www.aseanbriefing.com/doing-business-guide/malaysia/sector-insights/sector-insights-malaysia", "publisher": "ASEAN Briefing", "tier": "T3", "used_in": ["ecosystem-common"]},
+    {"id": "S39", "claim": "JSN-SR04T waterproof ultrasonic sensor (20-600cm, IP67) available in Malaysia via Shopee for ~RM20-50", "url": "https://shopee.com.my/Waterproof-Ultrasonic-Distance-Sensor-JSN-SR04T-Module-Water-Level-Measurement-Range-Fin", "publisher": "Shopee MY listing", "tier": "T5", "used_in": ["A-unit-econ"]},
+    {"id": "S40", "claim": "Average Malaysian household income RM8,479/month (2022); B40 threshold RM5,249; M40 band RM5,250-11,819 — M40/T20 urban households can absorb RM100-150 health/safety devices", "url": "https://themalaysianreserve.com/2023/07/28/average-household-income-at-rm8479-in-2022/", "publisher": "The Malaysian Reserve (DOSM HIES 2022)", "tier": "T2", "used_in": ["B-market", "A-market"]},
+    {"id": "S41", "claim": "2021-2022 Malaysian floods overview (event scale, evacuations, RM6.5B alternative estimate)", "url": "https://en.wikipedia.org/wiki/2021%E2%80%932022_Malaysian_floods", "publisher": "Wikipedia (community)", "tier": "T5", "used_in": ["A-timing"]},
+    {"id": "S42", "claim": "Govt allocated RM25M (2025) for immediate East-Malaysia flood infrastructure repairs; banks offered loan moratoriums", "url": "https://en.wikipedia.org/wiki/2024%E2%80%932025_floods_in_Southeast_Asia_and_South_Asia", "publisher": "Wikipedia (community)", "tier": "T5", "used_in": ["A-timing"]},
+    {"id": "S43", "claim": "RAK3172 (SX1262) LoRaWAN module is the commodity radio for IoT nodes (sub-USD20 module class)", "url": "https://store.rakwireless.com/collections/lorawan-modules", "publisher": "RAKwireless store", "tier": "T1", "used_in": ["A-competitive", "A-unit-econ"]},
+    {"id": "S44", "claim": "ChargEV grew 196->501 points (+155%); top-10 CPO landscape in Malaysia expanding rapidly", "url": "https://www.chargesini.com/updated-2026-top-10-cpos-in-malaysia/", "publisher": "ChargeSINI (industry tracker)", "tier": "T3", "used_in": ["C-market"]},
+    {"id": "S45", "claim": "OCPP 4G/WiFi comms modules for EV chargers are commodity items on the market (AliExpress-class supply)", "url": "https://portable-charging-pile.myshopify.com/products/ev-charger-4g-wifi-module-ocpp-communication-module-for-", "publisher": "Charging-pile module vendor", "tier": "T4", "used_in": ["C-competitive", "C-inversion"]},
+    {"id": "S46", "claim": "SDR-LoRa validated on USRP — LoRa PHY exists as open software, NOT as open silicon RTL", "url": "https://github.com/tapparelj/gr-lora_sdr", "publisher": "GitHub (community)", "tier": "T5", "used_in": ["A-IP", "differentiation-common"]}
+  ],
+  "learnings": [
+    "Malaysia's flood problem is recurring and quantified at national level (RM6.1B in 2021, RM933M in 2024, RM637M in 2025) — but early-warning infrastructure is coarse: JPS sirens at area level, NaFFWS at river-basin level, commercial sensors at USD 234-504. A <RM150 community node with local mesh radio is a genuine price/coverage gap.",
+    "Demographics are deterministic: Malaysia crosses the 15%-aged (60+) line ~2030, in the middle of the 4-year product window. M40/T20 urban households (avg income RM8,479/mo, 2022) can afford RM100-150 devices; substitutes are either app-only (free) or imported watches (USD 100-200) with no local support.",
+    "EV charging is a policy-driven growth market (10,000-point target vs 3,600 actual at end-2024; +153%/yr) with a clear missing middle: affordable OCPP-certifiable controller silicon. The charger itself is RM2,800-7,000 (system market) while the controller module (our device) can sit at RM99-149.",
+    "Open-source wireless RTL is a verified gap: LoRa and BLE PHYs exist only as SDR software (gr-lora_sdr, SDR-LoRa) — no production-grade pure-Verilog transceiver RTL. Any of our candidates that needs wireless MUST CREATE it in-house; this is simultaneously the differentiation and the top technical risk.",
+    "SKY130 feasibility baseline is strong for MCU+SRAM+analog: Caravel-class user area 3.1x3.8mm, 50-100MHz, sky130B ships 1-2kB SRAM macros, OpenRAM extends to 32-64kB, PDK includes analog primitives. Prototype economics: USD 9,750 chipIgnite or free Google MPW.",
+    "The 3-tier AMBA requirement maps naturally: CPU + SRAM + DMA on AXI4-Lite, streaming datapaths (ADC capture, sensor FIFOs, radio packets, metrology) on AHB with DMA, and all control/status registers on APB. This is a genuine architectural requirement for all three candidates, not decoration.",
+    "SIRIM Type Approval is a known, bounded regulatory path for radio devices in Malaysia (MCMC label, 2-6 months); medical-device registration (MDA) is avoided by NOT making health claims on candidate B's marketing."
+  ],
+  "contradictions": [
+    {
+      "topic": "Aging timeline definitions",
+      "claim_a": "Malaysia becomes ageing nation by 2030 (60+ >= 15%) — DOSM projection via Malay Mail + MPRH",
+      "claim_b": "Malaysia becomes aged nation by 2048 — MOF/Amir Hamzah (65+ >= 20%)",
+      "resolution": "Different thresholds: 'ageing nation' (60+ >= 15%) hits 2030; 'aged nation' (65+ >= 20%) hits 2048. Both official. Candidate B's 4-year window (2026-2030) spans the 2030 crossing — timing claim uses the 2030 fact.",
+      "sources": ["S14", "S15", "S16"]
+    },
+    {
+      "topic": "Flood loss figures across years",
+      "claim_a": "RM6.1B (Dec 2021, DOSM) — exceptional event",
+      "claim_b": "RM933.4M (2024) and RM636.9M (2025) — annual monsoon seasons",
+      "resolution": "Not a contradiction: 2021 was a 1-in-100-year event; annual losses are RM0.6-1B. Both cited; the pitch uses annual figures as baseline and 2021 as ceiling motivation.",
+      "sources": ["S01", "S03", "S04", "S05"]
+    },
+    {
+      "topic": "EV charging point counts",
+      "claim_a": "Target 10,000 public charge points by end-2025 (Low Carbon Mobility Blueprint)",
+      "claim_b": "Actual: ~3,600 charge points at end-2024 (Roland Berger); ~1,000 stations per MOSTI quote (ChargeSINI)",
+      "resolution": "Target vs actual gap confirmed; station vs point definitions differ. Use Roland Berger's 3,600 points (T2) as the primary actual figure; the gap is the market opportunity.",
+      "sources": ["S24", "S44"]
+    },
+    {
+      "topic": "2024 EV sales scope",
+      "claim_a": "14,766 BEV units (MAA TIV report)",
+      "claim_b": "46,403 xEV units incl. hybrids (MITI)",
+      "resolution": "Different scopes: BEV-only vs xEV (BEV+PHEV+HEV). Both official; use per-scope figures in the corpus and pitches.",
+      "sources": ["S21", "S22"]
+    }
+  ],
+  "validation_gaps": [
+    "RF front-end feasibility on sky130 (433/915MHz for A, 2.4GHz for B) lacks a T1/T2 silicon-proven citation; labeled hypothesis (T5) with mitigation: external RF front-end module fallback, in-house digital baseband is the CREATE-IP core.",
+    "sky130A volume wafer pricing is not published; die-cost model at 130nm is a T4/T5 estimate cross-checked against chipIgnite prototype pricing (T1) and module BOMs (T1/T5).",
+    "Malaysia-specific elderly-device TAM has no official figure; sized bottom-up from DOSM household/ageing data (T1) + global market reports (T4) — labeled as model, not measured."
+  ]
+}

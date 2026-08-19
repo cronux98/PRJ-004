@@ -1,0 +1,275 @@
+{
+  "project": "PRJ-004 (NEW) — Stage 0 Business Analysis",
+  "model": "deepseek-v4-flash",
+  "date": "2026-08-19",
+  "scoring_model": {
+    "chain": "raw evidence (cited, tiered) -> normalized score 0-100 per dimension -> weighted composite -> PASS/FAIL verdict",
+    "pass_threshold_composite": 70,
+    "pass_floor_per_dimension": 40,
+    "weights": {
+      "market_fit_size": 15,
+      "timing_growth": 10,
+      "competition_gap": 15,
+      "differentiation_novelty": 15,
+      "technical_feasibility": 20,
+      "unit_economics": 10,
+      "ip_ability": 10,
+      "regulatory_ecosystem": 5
+    },
+    "composite_formula": "sum(normalized * weight) / sum(weights) — max 100",
+    "verdict_rule": "PASS iff composite >= 70 AND every dimension >= 40 AND all 5 validation questions = YES (see market_validation.md)"
+  },
+  "candidates": {
+    "CANDIDATE-A": {
+      "name": "BanjirSense-MY — community flood early-warning node SoC (low-power, Sub-GHz mesh)",
+      "verdict": "PASS",
+      "composite": 72.15,
+      "recommended_winner": true,
+      "dimensions": {
+        "market_fit_size": {
+          "score": 72,
+          "evidence": [
+            {"claim": "Annual flood losses RM933.4M (2024) / RM636.9M (2025); RM6.1B in 2021 exceptional event", "source": "DOSM via Bernama S05 (T2), DOSM S04 (T1), CNA S01 (T2)"},
+            {"claim": "Device market sized bottom-up: 300-500k flood-prone community nodes (kampung, school, condo-basement, road-underpass) over 4 years x RM129-149 = RM40-70M TAM; SAM (urban KL/Selangor/Penang/JB + govt pilots + JPS/NADMA channel) ~100-150k units = RM13-22M", "source": "model from DOSM population/flood data (T1) + govt allocation RM25M East-MY repairs (T5 S42) — labeled model"},
+            {"claim": "M40/T20 urban households (avg income RM8,479/mo 2022) can absorb RM129-149 devices", "source": "S40 (T2)"}
+          ],
+          "rationale": "Problem is quantified nationally and recurring; device market is modest but government + community co-buyers exist. Segmented: device (node) vs system (warning network) — device is our TAM."
+        },
+        "timing_growth": {
+          "score": 82,
+          "evidence": [
+            {"claim": "Flood losses recur every monsoon (Nov-Mar); World Bank flags rising climate-driven costs", "source": "S06 (T2)"},
+            {"claim": "NaFFWS national forecasting expansion = govt spending on flood sensing infrastructure 2020-2026", "source": "S08 (T2), S09 (T1)"},
+            {"claim": "Community-level early warning remains coarse: area sirens (KL), no per-community low-cost sensing", "source": "S07 (T2)"},
+            {"claim": "RM25M 2025 federal allocation for flood-infrastructure repairs (East MY)", "source": "S42 (T5)"}
+          ],
+          "rationale": "Annual news hook + rising government budgets + climate intensity make the next 4 years the window."
+        },
+        "competition_gap": {
+          "score": 65,
+          "evidence": [
+            {"claim": "Commercial LoRaWAN level sensors USD 234-504 — 1.5-3x above our RM150 ceiling", "source": "RAK S10 (T1), Milesight S11 (T1)"},
+            {"claim": "Low-end Alibaba sensors USD 70-415 exist (price pressure, quality variance)", "source": "S12 (T4)"},
+            {"claim": "Academic LoRaWAN flood sensing units for Malaysia exist (T2) but are not products", "source": "S13 (T2)"},
+            {"claim": "JPS/NAFFWS is basin-level, not community-level; sirens are area-level", "source": "S07 (T2), S08 (T2)"},
+            {"claim": "DIY Arduino+JSN-SR04T flood projects are hobby-grade (repository.psa.edu.my thesis)", "source": "PSA repository (T5)"}
+          ],
+          "rationale": "Gap: <RM150 community node with mesh radio + local alerting, no network subscription. Substitutes are 2-3x pricier, network-dependent, or hobby-grade."
+        },
+        "differentiation_novelty": {
+          "score": 74,
+          "evidence": [
+            {"claim": "No open pure-Verilog Sub-GHz radio PHY exists (only SDR software: gr-lora_sdr, SDR-LoRa)", "source": "S35 (T2), S46 (T5)"},
+            {"claim": "In-house FSK radio baseband + mesh MAC + sensor AFE on open sky130 = first open Malaysian flood-node SoC", "source": "IP index: no wireless entries (T1)"},
+            {"claim": "Differentiation vs module-assembly competitors (MCU + SX1262) = single-die, solar/battery, mesh without gateway/network fees", "source": "S43 (T1) for module baseline"}
+          ],
+          "rationale": "Meaningfully different from commercial (module-built), academic (paper-only), and open-source (none) layers."
+        },
+        "technical_feasibility": {
+          "score": 70,
+          "evidence": [
+            {"claim": "All digital blocks sky130-proven: Ibex 100MHz (IP index T1), OpenRAM 32kB (T1), AXI/AHB/APB fabrics (T1), peripherals (T1)", "source": "IP index entries (T1)"},
+            {"claim": "Analog: 12-bit SAR ADC, comparator, LDO, PLL designable on sky130", "source": "S34 (T1), baseline_metrics.json"},
+            {"claim": "433/915MHz FSK PHY algorithms public (SDR-LoRa); sky130 RF front-end NOT silicon-proven — mitigation: external RF FE, in-house digital baseband", "source": "S35 (T2); hypothesis (T5)"},
+            {"claim": "3-tier AMBA justified: CPU+DMA on AXI4-Lite, sensor/radio streaming on AHB, control on APB", "source": "architecture sketch in pitch A"}
+          ],
+          "rationale": "High confidence on digital+analog core; RF front-end is the named risk with a fallback that preserves the CREATE-IP story (digital PHY)."
+        },
+        "unit_economics": {
+          "score": 68,
+          "evidence": [
+            {"claim": "BOM model at RM129 retail: SoC RM15-18 + ultrasonic sensor RM20-30 (JSN-SR04T, Shopee T5) + battery/solar RM12-18 + PCB RM12-15 + enclosure RM15-20 + RF parts RM8-15 = RM82-116 cost; margin 15-35% — thin but survivable at volume; mesh variant drops LoRa module cost to ~RM0 (radio on-die)", "source": "S39 (T5), S43 (T1), S10 (T1)"},
+            {"claim": "Prototype USD 9,750 (chipIgnite) or free Google MPW", "source": "S29 (T1), S31 (T1)"}
+          ],
+          "rationale": "Under RM150 achievable; margin sensitive to sensor/enclosure choices — drive volume via govt pilots + community programs."
+        },
+        "ip_ability": {
+          "score": 80,
+          "evidence": [
+            {"claim": "CREATE: Sub-GHz FSK radio PHY + MAC (no open equivalent — S35 T2); sensor-capture DMA engine; wake-on-comparator power gating", "source": "S35 (T2), IP index gap (T1)"},
+            {"claim": "REUSE: Ibex, pulp-axi, OpenRAM, SPI/UART/I2C, timers, PMU, interrupt ctrl (IP index T1)", "source": "IP index (T1)"},
+            {"claim": "Patentable angle: low-power mesh flood-alert protocol + energy-harvest node architecture", "source": "analysis (T5)"}
+          ],
+          "rationale": "Highest-value IP of the three: radio PHY/MAC is portable across IoT verticals."
+        },
+        "regulatory_ecosystem": {
+          "score": 70,
+          "evidence": [
+            {"claim": "SIRIM Type Approval mandatory for radio devices; MCMC label; 2-6 months (Mode B)", "source": "S37 (T3)"},
+            {"claim": "433/915MHz ISM band usable in Malaysia (SRD class)", "source": "S37 (T3) — confirm band plan at design time"},
+            {"claim": "Govt ecosystem: NaFFWS expansion + NIMP 2030 semiconductor push favor local silicon", "source": "S08 (T2), S38 (T3)"}
+          ],
+          "rationale": "Known bounded path; no medical/safety certification for non-consumer-alerting sensor nodes."
+        }
+      },
+      "composite_math": "(72*15 + 82*10 + 65*15 + 74*15 + 70*20 + 68*10 + 80*10 + 70*5) / 100 = 7215/100 = 72.15",
+      "failing_metrics": []
+    },
+    "CANDIDATE-B": {
+      "name": "JagaCare-MY — elderly aging-in-place health & safety monitor SoC (low-power, 2.4GHz GFSK/BLE-class, on-device DSP)",
+      "verdict": "PASS",
+      "composite": 70.85,
+      "dimensions": {
+        "market_fit_size": {
+          "score": 78,
+          "evidence": [
+            {"claim": "Malaysia ageing nation by 2030: 60+ reaches 15.3% (DOSM); 2.6M aged 65+ (7.7%) in 2024", "source": "S15 (T1), S14 (T2)"},
+            {"claim": "Device market bottom-up: 3.6M aged 60+ (2026e); urban M40/T20 families with elderly parents ~1.2-1.5M households; 8-12% 4-yr adoption = 100-180k devices x RM139-149 = RM14-27M SAM; TAM with nationwide + institutional (care homes) = RM30-50M", "source": "model from S15/S14/S40 — labeled model"},
+            {"claim": "Malaysia patient-monitoring device market USD 403M (2024) growing 6.1% CAGR — device segment context", "source": "S17 (T4)"}
+          ],
+          "rationale": "Deterministic demographics; adoption limited by trust/channel, not need."
+        },
+        "timing_growth": {
+          "score": 85,
+          "evidence": [
+            {"claim": "2030 aged-nation crossing lands inside the 4-year window (2026-2030)", "source": "S14 (T2), S15 (T1)"},
+            {"claim": "MOH digital health push: national FHIR HIN since 2022; digital-first healthcare policy", "source": "S19 (T2)"},
+            {"claim": "Elderly care is a standing national policy topic (National Policy for Older Persons; aged-nation 2048 fiscal warnings)", "source": "S16 (T1)"}
+          ],
+          "rationale": "Strongest timing story of the three — the demographic clock is fixed."
+        },
+        "competition_gap": {
+          "score": 62,
+          "evidence": [
+            {"claim": "Substitutes: Apple/Huawei watches with fall detection (USD 200-400+), generic fall watches USD 100-200 (S18 T3), app-only check-ins (I'm Alive, CorriCare, SmartPeep — MY competitors)", "source": "S18 (T3), S20 (T4)"},
+            {"claim": "No Malaysia-native <RM150 open-silicon elderly monitor device exists (market scan)", "source": "scan of S20 + Shopee/AliExpress class (T4/T5)"},
+            {"claim": "Gap: affordable, privacy-first (on-device detection, no cloud video), locally supported device", "source": "analysis (T5)"}
+          ],
+          "rationale": "Gap is real but the space is crowded at the top (smartwatches) and bottom (pendants); middle is ours."
+        },
+        "differentiation_novelty": {
+          "score": 72,
+          "evidence": [
+            {"claim": "CREATE: 2.4GHz GFSK baseband + link layer (BLE-class) in pure Verilog — no open equivalent (S35 T2)", "source": "S35 (T2)"},
+            {"claim": "On-device fall/health DSP accelerator (IMU feature extraction + PPG HR) — no cloud dependency", "source": "analysis; S20 competitors are cloud-AI (T4)"},
+            {"claim": "Open RTL + Malaysia-first positioning vs imported commodity modules", "source": "S36 (T1) nRF baseline"}
+          ],
+          "rationale": "Novel in the Malaysian context; BLE-class PHY is the moat if achieved."
+        },
+        "technical_feasibility": {
+          "score": 65,
+          "evidence": [
+            {"claim": "Digital core all proven: Ibex + OpenRAM + DMA + peripherals (IP index T1); DSP accelerator is standard Verilog (SINC/FFT/threshold)", "source": "IP index (T1)"},
+            {"claim": "Analog: SAR ADC for PPG path, comparator, LDO, PLL (T1/T5 baseline)", "source": "baseline_metrics.json (T1/T5)"},
+            {"claim": "2.4GHz RF front-end on sky130 = HIGH risk, not silicon-proven; mitigation: external BLE RF FE module + in-house digital baseband/link (CREATE core preserved)", "source": "hypothesis (T5) + S36 (T1) baseline"},
+            {"claim": "3-tier AMBA justified: CPU/DMA AXI4-Lite; ADC/IMU streaming + DSP on AHB; radio/AFE/PMU control on APB", "source": "architecture sketch in pitch B"}
+          ],
+          "rationale": "Feasible with the RF-fallback; honest 65 because 2.4GHz analog is the hardest of the three candidates' radios."
+        },
+        "unit_economics": {
+          "score": 65,
+          "evidence": [
+            {"claim": "Wearable BOM at RM139 retail: SoC RM17-20 + IMU RM8-12 + PPG RM10-15 + battery RM8-10 + strap/PCB/enclosure RM20-28 = RM63-85; margin 30-45% — volume-dependent", "source": "T5 model; cross-check fall watches USD 100-200 (S18 T3), nRF module class (S36 T1)"},
+            {"claim": "No medical certification if marketed as safety/monitoring (avoid MDA registration)", "source": "S37 (T3) analog + regulatory analysis"}
+          ],
+          "rationale": "Achievable at volume; retail < RM150 tight but workable with home-hub model (hub at RM99 + wearable at RM139)."
+        },
+        "ip_ability": {
+          "score": 78,
+          "evidence": [
+            {"claim": "CREATE: GFSK baseband/link IP + DSP accelerator + bio-AFE config engine — portable to wearables/medical IoT", "source": "S35 (T2) gap; analysis"},
+            {"claim": "REUSE: Ibex, OpenRAM, SPI (IMU), I2C (PPG), timers, PMU, watchdog (IP index T1)", "source": "IP index (T1)"}
+          ],
+          "rationale": "Radio + DSP IP highly reusable; patent angle on privacy-first on-device fall detection pipeline."
+        },
+        "regulatory_ecosystem": {
+          "score": 65,
+          "evidence": [
+            {"claim": "SIRIM Type Approval required (radio); MCMC label", "source": "S37 (T3)"},
+            {"claim": "MDA medical-device rules avoided by non-medical positioning — but marketing must be careful (inversion)", "source": "analysis (T5)"},
+            {"claim": "MOH FHIR HIN creates future data-interop pull for health devices", "source": "S19 (T2)"}
+          ],
+          "rationale": "Bounded; the medical-claims trap is the main regulatory risk and is manageable."
+        }
+      },
+      "composite_math": "(78*15 + 85*10 + 62*15 + 72*15 + 65*20 + 65*10 + 78*10 + 65*5) / 100 = 7085/100 = 70.85",
+      "failing_metrics": []
+    },
+    "CANDIDATE-C": {
+      "name": "EVCore-MY — smart EV AC-charger controller SoC (high-performance MCU class, CAN + metering DSP + CP analog)",
+      "verdict": "PASS",
+      "composite": 71.6,
+      "dimensions": {
+        "market_fit_size": {
+          "score": 70,
+          "evidence": [
+            {"claim": "Charging gap: 3,600 public points end-2024 vs 10,000 target end-2025; +153%/yr growth; 30% DC share", "source": "S24 (T2)"},
+            {"claim": "2024: 14,766 BEV + 30,796 hybrids (MAA); 46,403 xEV (MITI) — installed base growing 40-70%/yr", "source": "S21 (T1), S22 (T2)"},
+            {"claim": "Home AC chargers RM2,800-7,000 installed (system market); controller module (our device) RM99-149: 4-yr TAM ~80-150k modules = RM8-22M; SAM (MY charger makers + CPOs + retrofit) ~50-80k = RM5-12M", "source": "S25/S26 (T4) system prices; device model labeled"}
+          ],
+          "rationale": "Device market smallest in MYR of the three but fastest-growing; rides a policy-mandated build-out."
+        },
+        "timing_growth": {
+          "score": 80,
+          "evidence": [
+            {"claim": "Low Carbon Mobility Blueprint + NETR (net-zero 2050, 45% GHG cut 2030) mandate charging build-out", "source": "S24 (T2), S27 (T2)"},
+            {"claim": "Targets missed (3,600 vs 10,000) = the gap persists through 2026-2030", "source": "S24 (T2)"},
+            {"claim": "xEV sales growth 40-70%/yr makes home-charging a mass-market need in the window", "source": "S21 (T1), S22 (T2)"}
+          ],
+          "rationale": "Strong policy + market pull; window is exactly the charger build-out years."
+        },
+        "competition_gap": {
+          "score": 60,
+          "evidence": [
+            {"claim": "Global controller silicon: NXP/TI/ST EVSE reference designs; commodity OCPP 4G/WiFi modules (AliExpress-class) for retrofit", "source": "S45 (T4), S28 (T3)"},
+            {"claim": "No Malaysia-designed open EVSE controller SoC; local charger makers import controller boards", "source": "market scan (T4/T5)"},
+            {"claim": "Gap: affordable open-silicon OCPP-certifiable controller with local support, for MY charger OEMs", "source": "analysis (T5)"}
+          ],
+          "rationale": "Competition is real but imported/closed; the open-silicon + local-support angle is the wedge."
+        },
+        "differentiation_novelty": {
+          "score": 70,
+          "evidence": [
+            {"claim": "CREATE: CAN 2.0B controller + metrology DSP (energy accumulation, sinc filtering) + CP analog interface (PWM gen + level detect)", "source": "analysis; IP index has no CAN/metering entries (T1)"},
+            {"claim": "In-house OCPP-ready stack on open RTL — first open Malaysian EVSE SoC", "source": "S28 (T3) OCPP; analysis"},
+            {"claim": "Differentiation vs ESP32-based boards: metering-grade ADC, CP handling, CAN, security-ready MCU in one die", "source": "S45 (T4) baseline"}
+          ],
+          "rationale": "Differentiated in Malaysia; globally incremental (reference designs exist) — honest 70."
+        },
+        "technical_feasibility": {
+          "score": 82,
+          "evidence": [
+            {"claim": "No RF on-die (WiFi via external module) — the hardest RF risk is removed", "source": "architecture decision (pitch C)"},
+            {"claim": "All blocks sky130-proven: cv32e40p 100MHz (IP index T1), OpenRAM 64kB (T1), AXI/AHB/APB (T1), SPI/UART/I2C/PWM/timers (T1)", "source": "IP index (T1)"},
+            {"claim": "CAN controller + metrology DSP = standard digital Verilog; 16-bit oversampled ADC + comparator = sky130 analog (T1/T5)", "source": "baseline_metrics.json"},
+            {"claim": "3-tier AMBA justified: CPU/DMA AXI4-Lite; metering + display streaming on AHB; CP/GPIO/UART/PMU control on APB", "source": "architecture sketch in pitch C"}
+          ],
+          "rationale": "Easiest silicon path of the three (no RF) — the highest feasibility score."
+        },
+        "unit_economics": {
+          "score": 66,
+          "evidence": [
+            {"claim": "Module BOM at RM139 retail: SoC RM18-22 + WiFi module RM25-35 (ESP32-class, pre-certified) + power RM10-15 + PCB RM12-18 + relay/CT RM10-15 = RM75-105; margin 25-45%", "source": "T5 model; S25/S26 (T4) system-price context"},
+            {"claim": "Retrofit market (OCPP modules) price-anchors the device: commodity 4G/WiFi OCPP modules sell at RM150-300 — we undercut with local silicon", "source": "S45 (T4)"}
+          ],
+          "rationale": "Workable; WiFi module cost squeezes margin — BLE/Sub-GHz in-house variant improves it later."
+        },
+        "ip_ability": {
+          "score": 72,
+          "evidence": [
+            {"claim": "CREATE: CAN 2.0B (no open Verilog-2001 CAN in IP index — T1), metrology DSP, CP analog; REUSE: CPU/fabric/mem/periph (T1)", "source": "IP index (T1)"},
+            {"claim": "Metering + EVSE control IP reusable in smart meters, solar inverters, industrial control", "source": "analysis (T5)"}
+          ],
+          "rationale": "Strong reusable digital IP; CAN + metrology have wide secondary markets."
+        },
+        "regulatory_ecosystem": {
+          "score": 68,
+          "evidence": [
+            {"claim": "EVSE standard: MS IEC 61851 (Type 2, CP signaling); OCPP 1.6/2.0.1 conformance (OCA)", "source": "S28 (T3); standard knowledge (T2)"},
+            {"claim": "SIRIM: WiFi module pre-certified; charger needs SIRIM/ST certification — local OEM channel handles it", "source": "S37 (T3)"},
+            {"claim": "NIMP 2030/NSS: local EVSE silicon aligns with national semiconductor strategy", "source": "S38 (T3)"}
+          ],
+          "rationale": "Clear path via local OEM partners; legal metrology avoided (no billing-grade claims)."
+        }
+      },
+      "composite_math": "(70*15 + 80*10 + 60*15 + 70*15 + 82*20 + 66*10 + 72*10 + 68*5) / 100 = 7160/100 = 71.60",
+      "failing_metrics": []
+    }
+  },
+  "ranking": {
+    "1": "CANDIDATE-A BanjirSense-MY — 72.15 (RECOMMENDED WINNER)",
+    "2": "CANDIDATE-C EVCore-MY — 71.60",
+    "3": "CANDIDATE-B JagaCare-MY — 70.85",
+    "winner_rationale": "A wins on the owner's core axes: strongest Malaysia-specific unsolved problem (recurring floods, RM0.6-6B/yr losses), cleanest CREATE-wireless-in-house claim (Sub-GHz FSK ≪ 2.4GHz BLE complexity), credible govt/community co-buyer channel, and the deepest IP-ability. C is a close second with the best silicon feasibility; B trails on feasibility and crowded competition. All three PASS the bottom-to-top threshold; the verdict is derivable from the JSON."
+  }
+}
