@@ -1,0 +1,34 @@
+{
+  "project": "PRJ-004",
+  "codename": "EVCore-MY",
+  "model": "metering_golden",
+  "identical": true,
+  "first_hash": "b35ac2cbe14b8a9055aa978a4fc23c27",
+  "n_runs": 3,
+  "runs": [
+    {
+      "seed": 42,
+      "file": "golden_out_seed42.json",
+      "tests_md5": "b35ac2cbe14b8a9055aa978a4fc23c27",
+      "run_log": "run_log_seed42_2153438.txt"
+    },
+    {
+      "seed": 123,
+      "file": "golden_out_seed123.json",
+      "tests_md5": "b35ac2cbe14b8a9055aa978a4fc23c27",
+      "run_log": "run_log_seed123_2153438.txt"
+    },
+    {
+      "seed": 999,
+      "file": "golden_out_seed999.json",
+      "tests_md5": "b35ac2cbe14b8a9055aa978a4fc23c27",
+      "run_log": "run_log_seed999_2153438.txt"
+    }
+  ],
+  "method": "MD5 of sorted tests JSON array (excluding _metadata); per-run logs contain PID+timestamp",
+  "harness": {
+    "pid": "2153438",
+    "started_utc": "2026-08-19T15:06:12Z"
+  },
+  "timestamp": "2026-08-19T15:06:12Z"
+}

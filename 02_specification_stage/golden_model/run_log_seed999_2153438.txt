@@ -1,0 +1,21 @@
+=== PRJ-004 EVCore-MY Metering Golden Model v1.0.0 ===
+seed=999  python=3.11.15  pid=2153450
+--- Self-test ---
+  [PASS] Vrms==230
+  [PASS] Irms==8
+  [PASS] P==V*I
+  [PASS] Q==0
+  [PASS] PF==1
+  [PASS] THD_v==0
+  [PASS] THD_i==0
+  [PASS] PF=0.5 P
+  [PASS] PF=0.5 Q1
+  [PASS] PF=0.5 S
+  [PASS] THD target 10%
+Self-test PASS
+--- Output ---
+scenarios: 64  tests_md5: b35ac2cbe14b8a9055aa978a4fc23c27
+wrote: /home/smdadmin/hermes_workspace/projects/PRJ-004/v0/02_specification_stage/golden_model/golden_out_seed999.json
+
+# harness: seed=999 out=golden_out_seed999.json
+# harness: run_pid=2153438 log_start=2026-08-19T15:06:12Z log_end=2026-08-19T15:06:23Z

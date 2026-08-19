@@ -222,14 +222,14 @@ is what viva panels punish. The defensible "firsts" are: *first open-source sky1
 **Design rule for the whole project: pure Verilog-2001/2005 only. Zero SystemVerilog, zero VHDL in any
 synthesizable source.** (Verification in Python/cocotb/pyuvm is fine and encouraged — that is not RTL.)
 
-### 3.1 Physical budget (sky130 / Caravel-class MPW, **no tapeout required**)
+### 3.1 Physical budget (standalone sky130 die via OpenLane, **no tapeout required**)
 
 | Parameter | Recommendation | Rationale |
 |---|---|---|
-| Target platform | Efabless **Caravel** harness (chipIgnite / Google MPW), sky130A | User project area ≈ **2.92 mm × 3.52 mm ≈ 10 mm²** — plenty of headroom |
-| Std-cell logic budget | **~60–100 k cells** (core + peripherals + metering DSP + CAN) | picorv32 ≈ 10–15 k; the rest is small. Comfortable in Caravel |
-| SRAM | **16 kB baseline** (8 × 2 kB OpenRAM 1-port), 32 kB stretch | SRAM dominates area — budget ~1–2 mm². Start at 16 kB |
-| Total area target | **< 3–4 mm² of ~10 mm²** | Leaves margin for a first back-end pass |
+| Target platform | **Standalone sky130A die** via the OpenLane/LibreLane flow (no Caravel harness — owner decision 2026-08-19) | Full pad ring, own I/O; ~**1–3 mm²** die area is comfortable for this block count |
+| Std-cell logic budget | **~60–100 k cells** (core + peripherals + metering DSP + CAN) | picorv32 ≈ 10–15 k; the rest is small |
+| SRAM | **16 kB baseline** (8 × 2 kB OpenRAM 1-port), 32 kB stretch | SRAM dominates area — budget ~0.5–1 mm². Start at 16 kB |
+| Total area target | **~1–3 mm² die** | Leaves margin for a first back-end pass |
 | Clock | **40 MHz core** (25 MHz safe fallback; **cut the 100 MHz**) | sky130 closes 25–50 MHz easily; 100 MHz is a back-end fight |
 | Analog custom blocks | **≤ 3**: 1 PLL (or ext-clock + divider), 1×12-bit SAR ADC (CP/aux), 1–2 comparators (CP level, zero-cross). **LDO external.** | Keep analog tiny; *externalise the 16-bit metering ADC* |
 | Deliverable | **Verified RTL + OpenLane hardening report (area/timing/power) + GLS** | Thesis stops at sign-off analysis; silicon is out of scope |
