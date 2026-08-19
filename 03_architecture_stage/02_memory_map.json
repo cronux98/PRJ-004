@@ -1,0 +1,360 @@
+{
+  "$schema_note": "Schema per memory-map skill: {core, regions[], peripherals[]}. Extended with tiers[]/masters[]/interrupts[]/reserved[] to faithfully capture the 3-tier AMBA (AXI4-Lite / AHB3-Lite / APB) layout defined in 01_ARCHITECTURE.md §2-3. All addresses/sizes sourced from ARCHITECTURE.md §3.1-3.3 and §7 (IRQ map) — no invented addresses.",
+  "project": "PRJ-004",
+  "codename": "EVCore-MY",
+  "source": "03_architecture_stage/01_ARCHITECTURE.md §2 (Bus Architecture), §3 (Memory Map), §7 (Interrupt Map), §8 (Module-by-Module)",
+  "date": "2026-08-19",
+
+  "core": {
+    "isa": "RV32IMC",
+    "abi": "ilp32",
+    "cpu": "MOD-01 picorv32 (picorv32_axi wrapper, multi-cycle, non-pipelined)",
+    "reset_vector": "0x00000000",
+    "trap_addr": "0x00000010",
+    "trap_addr_note": "PROGADDR_IRQ architecture default (ARCHITECTURE.md §4); firmware places its vector table here",
+    "irq_line": "single aggregated line onto picorv32 irq[3]; irq[2:0] and irq[31:4] tied off (ARCHITECTURE.md §4, §7)",
+    "clock_hz": 40000000,
+    "clock_fallback_hz": 25000000
+  },
+
+  "address_width_bits": 32,
+
+  "tiers": [
+    {
+      "tier": "AXI4-Lite",
+      "level": "top",
+      "cpu_visible": true,
+      "masters": [
+        "M0: MOD-01 picorv32 (picorv32_axi)",
+        "M1: MOD-15 boot-copy engine (boot-time only, quiesced post-boot)",
+        "M2: reserved, unpopulated (MOD-17 deferred DMA)"
+      ],
+      "interconnect": "MOD-02 alexforencich verilog-axi axil_crossbar/axil_interconnect (2 masters x 3 slaves v1)",
+      "window_count": 3,
+      "default_responder": "unmapped AXI address space returns verilog-axi default responder error/zero"
+    },
+    {
+      "tier": "AHB3-Lite",
+      "level": "mid",
+      "cpu_visible": false,
+      "masters": ["M0: MOD-03 AXI-Lite->AHB bridge (sole AHB master)"],
+      "interconnect": "fixed-priority single-master decode inside MOD-03",
+      "window_count": 3,
+      "parent_window": "sits entirely inside AXI4-Lite window 0x40000000, size 0x00100000 (1 MB)"
+    },
+    {
+      "tier": "APB",
+      "level": "leaf",
+      "cpu_visible": false,
+      "masters": ["M0: MOD-04 AHB->APB bridge (sole APB master)"],
+      "interconnect": "MOD-04 decodes low 16 bits of incoming AHB address to 12 psel lines (AR-1)",
+      "window_count": 12,
+      "parent_window": "sits entirely inside AHB3-Lite window 0x40002000, size 0x0000C000 (48 kB, per AR-1)"
+    }
+  ],
+
+  "regions": [
+    {
+      "name": "MOD-05_SRAM_16kB",
+      "tier": "AXI4-Lite",
+      "slave_id": "S0",
+      "base": "0x00000000",
+      "size": "0x00004000",
+      "size_bytes": 16384,
+      "permissions": "rw",
+      "notes": "OpenRAM 8x2kB 1-port macros, AXI4-Lite-to-SRAM wrapper. Boot target; PROGADDR_RESET = 0x00000000."
+    },
+    {
+      "name": "MOD-03_AXI_AHB_bridge_window",
+      "tier": "AXI4-Lite",
+      "slave_id": "S1",
+      "base": "0x40000000",
+      "size": "0x00100000",
+      "size_bytes": 1048576,
+      "permissions": "rw",
+      "notes": "1 MB window; all AHB/AHB-behind-APB devices decode inside this window (see ahb_regions below). Only 0x0000C000 of the 1 MB is actually populated (MOD-06+MOD-07+MOD-04 fanout) — remainder is reserved."
+    },
+    {
+      "name": "MOD-15_AXI4L_sys_regs",
+      "tier": "AXI4-Lite",
+      "slave_id": "S2",
+      "base": "0x7F000000",
+      "size": "0x00001000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "notes": "Bridge config, chip ID, debug — CPU-side, not APB. Also where MOD-15's cross-tier PMU status is exposed at the AXI tier."
+    }
+  ],
+
+  "ahb_regions": [
+    {
+      "name": "MOD-06_Metering_DSP",
+      "tier": "AHB3-Lite",
+      "slave_id": "S0",
+      "base": "0x40000000",
+      "size": "0x00001000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "notes": "Sample ingress FIFO (stream) + result/status burst regs, <=8 in-band (REQ-040, tiering exception rule §2.1.4)"
+    },
+    {
+      "name": "MOD-07_CAN_2.0B_FIFO",
+      "tier": "AHB3-Lite",
+      "slave_id": "S1",
+      "base": "0x40001000",
+      "size": "0x00001000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "notes": "TX/RX frame FIFOs (stream) + SJA1000-class control/status/interrupt/acceptance/timing regs, <=8 in-band, kept on AHB per §2.1.4 exception"
+    },
+    {
+      "name": "MOD-04_AHB_APB_bridge_window",
+      "tier": "AHB3-Lite",
+      "slave_id": "S2",
+      "base": "0x40002000",
+      "size": "0x0000C000",
+      "size_bytes": 49152,
+      "permissions": "rw",
+      "notes": "APB tier fan-out window; contains all 12 APB peripheral slots below, base 0x40002000 through 0x4000DFFF inclusive."
+    }
+  ],
+
+  "peripherals": [
+    {
+      "name": "MOD-08_CP_engine",
+      "id": "MOD-08",
+      "tier": "APB",
+      "psel": 0,
+      "base": "0x40002000",
+      "offset_from_apb_base": "0x0000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 11,
+      "ip": "CREATE (small), IEC 61851 CP engine"
+    },
+    {
+      "name": "MOD-09_UART0_debug",
+      "id": "MOD-09",
+      "tier": "APB",
+      "psel": 1,
+      "base": "0x40003000",
+      "offset_from_apb_base": "0x1000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 0,
+      "ip": "EF_UART (REUSE_INTERNAL)"
+    },
+    {
+      "name": "MOD-09_UART1_wifi",
+      "id": "MOD-09",
+      "tier": "APB",
+      "psel": 2,
+      "base": "0x40004000",
+      "offset_from_apb_base": "0x2000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 1,
+      "ip": "EF_UART (REUSE_INTERNAL)"
+    },
+    {
+      "name": "MOD-10_SPI0_display",
+      "id": "MOD-10",
+      "tier": "APB",
+      "psel": 3,
+      "base": "0x40005000",
+      "offset_from_apb_base": "0x3000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 2,
+      "ip": "EF_SPI (REUSE_INTERNAL)"
+    },
+    {
+      "name": "MOD-10_SPI1_flash",
+      "id": "MOD-10",
+      "tier": "APB",
+      "psel": 4,
+      "base": "0x40006000",
+      "offset_from_apb_base": "0x4000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 3,
+      "ip": "EF_SPI (REUSE_INTERNAL); boot-time SPI1 access instead uses MOD-15's bit-banged FSM, this peripheral is post-boot only"
+    },
+    {
+      "name": "MOD-11_I2C0_rtc",
+      "id": "MOD-11",
+      "tier": "APB",
+      "psel": 5,
+      "base": "0x40007000",
+      "offset_from_apb_base": "0x5000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 4,
+      "ip": "EF_I2C (REUSE_INTERNAL)"
+    },
+    {
+      "name": "MOD-12_GPIO8",
+      "id": "MOD-12",
+      "tier": "APB",
+      "psel": 6,
+      "base": "0x40008000",
+      "offset_from_apb_base": "0x6000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 5,
+      "ip": "EF_GPIO8 (REUSE_INTERNAL)"
+    },
+    {
+      "name": "MOD-13_TMR32",
+      "id": "MOD-13",
+      "tier": "APB",
+      "psel": 7,
+      "base": "0x40009000",
+      "offset_from_apb_base": "0x7000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 6,
+      "ip": "EF_TMR32 (REUSE_INTERNAL)"
+    },
+    {
+      "name": "MOD-13_PWM32",
+      "id": "MOD-13",
+      "tier": "APB",
+      "psel": 8,
+      "base": "0x4000A000",
+      "offset_from_apb_base": "0x8000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 7,
+      "ip": "EF_PWM32 (REUSE_INTERNAL, index gap A1); fallback EF_TMR32 PWM mode occupies same slot 0x8000 if unqualified"
+    },
+    {
+      "name": "MOD-14_WDT32",
+      "id": "MOD-14",
+      "tier": "APB",
+      "psel": 9,
+      "base": "0x4000B000",
+      "offset_from_apb_base": "0x9000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 8,
+      "ip": "EF_WDT32 (REUSE_INTERNAL)"
+    },
+    {
+      "name": "MOD-15_PMU_INTC_bootctrl",
+      "id": "MOD-15",
+      "tier": "APB",
+      "psel": 10,
+      "base": "0x4000C000",
+      "offset_from_apb_base": "0xA000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": 14,
+      "ip": "CREATE (small); also owns CLK_GATE_EN bits (REQ-035) and IRQ aggregator (IRQ_EN/IRQ_PEND) at this slot; cross-tier module also present at AXI S2 (0x7F000000) and as AXI master M1"
+    },
+    {
+      "name": "MOD-16_SAR_ADC_comparator_ctrl",
+      "id": "MOD-16",
+      "tier": "APB",
+      "psel": 11,
+      "base": "0x4000D000",
+      "offset_from_apb_base": "0xB000",
+      "size": "0x1000",
+      "size_bytes": 4096,
+      "permissions": "rw",
+      "irq": [12, 13],
+      "irq_note": "IRQ 12 = SAR ADC conversion done, IRQ 13 = comparator (zero-cross) edge",
+      "ip": "BLACKBOX analog wrapper (BB-02 SAR ADC 12b, BB-03 comparator x1-2)"
+    }
+  ],
+
+  "interrupt_map": [
+    {"irq": 0, "source": "UART0 (debug)", "module": "MOD-09"},
+    {"irq": 1, "source": "UART1 (WiFi)", "module": "MOD-09"},
+    {"irq": 2, "source": "SPI0 (display)", "module": "MOD-10"},
+    {"irq": 3, "source": "SPI1 (flash)", "module": "MOD-10"},
+    {"irq": 4, "source": "I2C0", "module": "MOD-11"},
+    {"irq": 5, "source": "GPIO8", "module": "MOD-12"},
+    {"irq": 6, "source": "TMR32", "module": "MOD-13"},
+    {"irq": 7, "source": "PWM32 (optional)", "module": "MOD-13"},
+    {"irq": 8, "source": "WDT32", "module": "MOD-14"},
+    {"irq": 9, "source": "CAN 2.0B", "module": "MOD-07"},
+    {"irq": 10, "source": "Metering DSP", "module": "MOD-06"},
+    {"irq": 11, "source": "CP engine", "module": "MOD-08"},
+    {"irq": 12, "source": "SAR ADC", "module": "MOD-16"},
+    {"irq": 13, "source": "Comparator (zero-cross)", "module": "MOD-16"},
+    {"irq": 14, "source": "PMU", "module": "MOD-15"},
+    {"irq": 15, "source": "reserved", "module": null}
+  ],
+
+  "reserved": [
+    {
+      "name": "AXI_gap_post_SRAM",
+      "tier": "AXI4-Lite",
+      "base": "0x00004000",
+      "end_exclusive": "0x40000000",
+      "size_bytes": 1073725440,
+      "note": "Unmapped between SRAM (16 kB) and the AXI->AHB bridge window; default responder returns error/zero"
+    },
+    {
+      "name": "AXI_gap_post_bridge_window",
+      "tier": "AXI4-Lite",
+      "base": "0x40100000",
+      "end_exclusive": "0x7F000000",
+      "size_bytes": 1056898048,
+      "note": "Unmapped between the 1 MB AXI->AHB bridge window and MOD-15 AXI sys regs"
+    },
+    {
+      "name": "AXI_gap_post_sysregs",
+      "tier": "AXI4-Lite",
+      "base": "0x7F001000",
+      "end_exclusive": "0x100000000",
+      "size_bytes": 2164256768,
+      "note": "Unmapped tail of 32-bit AXI address space above MOD-15 sys regs"
+    },
+    {
+      "name": "AHB_bridge_window_unused_tail",
+      "tier": "AXI4-Lite/AHB-window",
+      "base": "0x4000E000",
+      "end_exclusive": "0x40100000",
+      "size_bytes": 1042432,
+      "note": "Portion of the 1 MB AXI->AHB bridge window (0x40000000-0x40100000) not consumed by the 3 populated AHB slave windows (MOD-06 4kB + MOD-07 4kB + MOD-04 48kB = 56 kB used of 1 MB)"
+    },
+    {
+      "name": "APB_bridge_window_headroom",
+      "tier": "AHB3-Lite/APB-window",
+      "base": "0x4000E000",
+      "end_exclusive": "0x40010000",
+      "size_bytes": 8192,
+      "note": "ARCHITECTURE.md §3.4 states the AHB->APB bridge region as [0x40002000, 0x40010000) = 0xE000 (56 kB), but AR-1 (§3.2) explicitly derives the downstream APB range as 0x40002000-0x4000DFFF = 0xC000 (48 kB), matching the 12x4kB APB slots exactly and stated twice as '48 kB'. This 8 kB span (0x4000E000-0x40010000) reconciles the two statements: treated here as reserved headroom within the bridge's low-16-bit pass-through decode, not as populated APB slots. Flagged per instruction not to silently re-interpret; escalate to architecture owner if this reading is wrong."
+    }
+  ],
+
+  "unpopulated_masters": [
+    {
+      "name": "MOD-17 optional 1-channel DMA",
+      "tier": "AXI4-Lite",
+      "master_id": "M2",
+      "status": "reserved, unpopulated in v1 (deferred per REQ-058)"
+    }
+  ],
+
+  "sanity_checks": {
+    "no_overlaps": "Verified: AXI regions [0x0,0x4000), [0x40000000,0x40100000), [0x7F000000,0x7F001000) are pairwise disjoint. AHB regions [0x40000000,0x40001000), [0x40001000,0x40002000), [0x40002000,0x4000E000) are disjoint and contiguous. APB 12 slots [0x40002000+n*0x1000, +0x1000) for n=0..11 are disjoint and contiguous, exactly filling [0x40002000,0x4000E000).",
+    "all_bases_within_32bit": true,
+    "known_source_discrepancy": "See reserved[].APB_bridge_window_headroom note — ARCHITECTURE.md §3.4 arithmetic (0x40010000) does not match AR-1's explicit 48 kB derivation (0x4000E000); this file uses the AR-1 value as authoritative since it is stated twice and matches the 12x4kB peripheral count exactly."
+  },
+
+  "deviation_note": "analog_manifest.json was NOT generated in this run: the task instructions explicitly restricted output to only this file (02_memory_map.json) and forbade writing to any other path, which supersedes the memory-map skill's normal instruction to also emit analog_manifest.json. Per ARCHITECTURE.md §8.16/REQ-048, this project is not all-digital (MOD-16 = BLACKBOX, SAR ADC + 1-2 comparators, 2 of <=3 analog blocks used, PLL BB-04 not instantiated in v1) so analog_manifest.json's blocks[] would be non-empty, not blocks:[] -- Stage AMS would be dispatched. This should be generated as a separate, explicitly-authorized write."
+}
