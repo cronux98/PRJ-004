@@ -133,11 +133,256 @@ Failing metrics: none.
 
 ---
 
-## Aggregate
-- Recommended winner: **CANDIDATE-A BanjirSense-MY (72.15)** — strongest Malaysia-specific
-  unsolved problem, cleanest CREATE-wireless-in-house story (Sub-GHz FSK), credible
-  govt/community co-buyer channel, highest IP-ability. C (71.60) is close on feasibility;
-  B (70.85) passes but carries the 2.4GHz RF risk and the most crowded competitive field.
-- All three verdicts are derivable bottom-to-top from candidates_scores.json
-  (evidence -> normalized score -> weighted composite -> PASS/FAIL).
-- Every verdict is a binary PASS per the scoring rule; no graded/qualified verdicts exist in this stage.
+
+## CANDIDATE-D: AgriCore-MY — solar fertigation/irrigation controller SoC for paddy & vegetable smallholders
+
+### 5 validation questions
+1. **Is the problem real, long-standing, and unsolved in Malaysia?** YES. Rice SSR misses every
+   target: 75% by 2025 "increasingly unlikely" [S48|T2], 13MP wants 80% [S47|T2], BERNAS handed an
+   80% SSL mission [S49|T2]; yields stagnate vs input costs and weather [S50|T2]. Smallholders lack
+   affordable fertigation automation (imports USD ~408+ [S52|T4]; Netafim entering the segment [S51|T3]).
+2. **Is there a credible buyer/payer channel for the DEVICE?** YES (weak). FAMA/MADA/KADA co-op
+   channels and MAFI B2G programs exist, but the primary buyer is a price-sensitive smallholder —
+   the weakest payer in the Malaysian economy (market_fit 60 reflects this).
+3. **Can the device retail < RM150 with a survivable margin?** MARGINAL — BOM RM85-123 at RM129-149
+   leaves 10-30%; probe cost can erase it (unit_economics 58). Treated as not-YES for PASS purposes.
+4. **Can the SoC be built on sky130 with Verilog-2005 + AMBA 3-tier + analog/SRAM?** YES. All digital
+   proven (Ibex idx#13, OpenRAM idx#25, peripherals — T1); EC/pH high-Z AFE + 12-bit SAR + MPPT
+   designable [S34|T1]; radio reuses Candidate-A Sub-GHz IP. 3-tier AMBA justified (CPU/DMA masters,
+   sensor streaming on AHB, control on APB).
+5. **Are regulatory/ecosystem hurdles bounded?** YES. SIRIM only if radio enabled [S37|T3]; no agri
+   certification for a controller; distribution, not regulation, is the ecosystem risk.
+
+### Risk matrix
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Smallholder price sensitivity | HIGH | HIGH | Probe-optional kit, co-op bulk buying, B2G subsidies |
+| Distribution/trust | MED | HIGH | FAMA/MADA/KADA channels; extension-officer training |
+| Probe reliability at low cost | MED | HIGH | Probe-agnostic AFE; sensor-grade guide; warranty tiering |
+| Netafim low-end squeeze | MED | MED | Open RTL + local support + no-subscription mesh |
+| Yield uplift must be proven | MED | HIGH | UTHM greenhouse data [S53|T2] + pilot plots before scale claims |
+
+### Verdict: FAIL — composite 67.20 (< 70 floor), no dimension < 40 (min 58), validation Q3 not fully YES.
+Failing metrics: market_fit_size 60, unit_economics 58. Watch-item, not dead end — B2G-anchored model could flip it.
+
+---
+
+## CANDIDATE-E: SolarSync-MY — residential solar self-consumption optimizer & monitor SoC
+
+### 5 validation questions
+1. **Is the problem real, long-standing, and unsolved in Malaysia?** YES. NEM Rakyat quota fully
+   taken up (May 2025, SEDA data) [S56|T3]; 1.75GW rooftop base [S59|T4]; owners lack a brand-agnostic
+   way to see solar-vs-consumption and shift loads (inverter apps closed [T5 analysis]; EMS RM1,000+
+   [S60|T4]; imports measure-only [S61|T4]).
+2. **Is there a credible buyer/payer channel?** YES. SEDA-certified installer channel attaches at
+   install; e-commerce DIY retrofit for the 1.75GW base [S58|T1, S59|T4].
+3. **Can the device retail < RM150 with a survivable margin?** YES. BOM RM56-82 at RM139 (SoC
+   RM15-18, 2x CT RM10-15, relay RM8-12, PSU RM8-12, PCB/enclosure RM15-25); margin 30-50%.
+4. **Can the SoC be built on sky130 with Verilog-2005 + AMBA 3-tier + analog/SRAM?** YES — easiest
+   silicon in batch 2: metering DSP shared with Candidate-C (proven design), 2x 16-bit oversampled
+   ADC + zero-cross analog designable [S34|T1]; no RF on-die v1. 3-tier AMBA justified (CPU/DMA
+   masters, metrology streaming on AHB, control on APB).
+5. **Are regulatory/ecosystem hurdles bounded?** YES. No radio v1 = minimal SIRIM [S37|T3]; CT
+   metering explicitly non-billing (legal metrology avoided); installer ecosystem is the rail.
+
+### Risk matrix
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Inverter apps get better | MED | HIGH | We actuate (relay), they only display; brand-agnostic + offline |
+| CT accuracy disputes | MED | MED | Metering-grade accumulation, non-billing positioning, per-unit calibration |
+| Installer channel concentration | MED | MED | Multi-EPC white-label + direct e-commerce |
+| Sub-GHz module adds SIRIM time | LOW | LOW | v1 display/wired; module optional; SIRIM path known [S37|T3] |
+| Smart-meter AMI absorbs use-case | LOW | MED | AMI gives data, not actuation — optimizer function survives |
+
+### Verdict: PASS — composite 71.45 (>= 70), no dimension < 40, all 5 validation questions YES.
+Failing metrics: none (weakest: competition & gap 60 — crowded at the edges, empty in the middle).
+
+---
+
+## CANDIDATE-F: HazeGuard-MY — indoor air quality + CO2 monitor SoC calibrated to Malaysia's API
+
+### 5 validation questions
+1. **Is the problem real, long-standing, and unsolved in Malaysia?** YES. Aug 2026 haze: 11-12
+   stations unhealthy, Serian API 204 [S63|T2]; official API network is outdoor-only and sparse;
+   indoor exposure (schools/homes) unmeasured [S67|T2]; school CO2 monitors demanded since 2021
+   [S66|T3]; haze returns every dry season [S65|T3].
+2. **Is there a credible buyer/payer channel?** YES. M40/T20 urban households (RM8,479/mo [S40|T2]);
+   school/kindergarten bulk via MOE-linked procurement; SME/office channel.
+3. **Can the device retail < RM150 with a survivable margin?** YES (two-SKU). PM-only RM99 (BOM
+   RM60-80, margin 20-40%); +CO2 RM149 (BOM RM95-130, margin 13-35%). CO2 SKU is thin but the PM SKU
+   carries the floor.
+4. **Can the SoC be built on sky130 with Verilog-2005 + AMBA 3-tier + analog/SRAM?** YES. The hard
+   measurement heads (laser PM, NDIR CO2) are commodity external sensors; the SoC does fusion,
+   Malaysia-API calibration, display, and mesh — all proven digital blocks (Ibex, OpenRAM, peripherals
+   T1) plus trivial analog. 3-tier AMBA justified (sensor streaming on AHB, control on APB).
+5. **Are regulatory/ecosystem hurdles bounded?** YES. SIRIM only if radio enabled [S37|T3]; no
+   mandatory consumer IAQ certification; NRES/DOE API network is the natural calibration partner.
+
+### Risk matrix
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| CO2 sensor cost squeezes margin | MED | HIGH | PM-only RM99 SKU; CO2 premium SKU; volume pricing |
+| Commodity import flood (Xiaomi/Aqara) | MED | HIGH | Local API calibration + mesh + school channel + open RTL |
+| Sensor accuracy disputes | MED | MED | Cross-calibration vs DOE stations during haze events; publish data |
+| Haze seasonality = lumpy demand | MED | MED | School-year procurement calendar; CO2/ventilation use-case year-round |
+| API scale changes | LOW | LOW | Calibration table is firmware-updatable |
+
+### Verdict: PASS — composite 70.90 (>= 70), no dimension < 40, all 5 validation questions YES.
+Failing metrics: none (weakest: unit economics 60 — CO2 SKU margin).
+
+---
+
+## CANDIDATE-G: HomeEye-MY — privacy-first smart video doorbell SoC
+
+### 5 validation questions
+1. **Is the problem real, long-standing, and unsolved in Malaysia?** YES. Doorbells start RM552
+   [S70|T4], systems RM1-2k [S71|T4], all foreign-cloud with subscriptions; no <RM150 local-first,
+   no-subscription, PDPA-friendly option exists.
+2. **Is there a credible buyer/payer channel?** YES. M40/T20 urban households; e-commerce + local
+   security integrators (who today bundle imports [S71|T4]).
+3. **Can the device retail < RM150 with a survivable margin?** MARGINAL — BOM RM96-134 at RM139-149
+   (camera RM25-35, WiFi RM25-35, PSRAM RM8-12, SoC RM18-22, PSU/PCB/enclosure RM20-30) leaves 3-30%;
+   survivable only at volume with component tiering (unit_economics 54). Treated as not-YES for PASS
+   purposes.
+4. **Can the SoC be built on sky130 with Verilog-2005 + AMBA 3-tier + analog/SRAM?** YES with the
+   hardest CREATE of the batch: low-res vision accelerator on 100MHz-class core + external PSRAM;
+   camera via DVP module. Feasible, ambitious (technical_feasibility 64).
+5. **Are regulatory/ecosystem hurdles bounded?** YES. Pre-certified WiFi module covers SIRIM [S37|T3];
+   PDPA alignment is a selling point; firmware security is budgeted scope, not a blocker.
+
+### Risk matrix
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Margin squeeze vs RM150 ceiling | HIGH | HIGH | Component tiering; white-label volume; revisit price floor |
+| Vision accelerator complexity | HIGH | HIGH | v1 = motion + PIR + low-res person; cloud-optional ID later |
+| Ring/Eufy brand gravity | MED | HIGH | Local-first privacy + no-subscription + open RTL; different buyer |
+| WiFi module certification | MED | MED | Pre-certified module covers SIRIM |
+| Firmware security burden | MED | HIGH | Signed boot, encrypted local storage, OTA as first-class scope |
+
+### Verdict: FAIL — composite 66.60 (< 70 floor), no dimension < 40 (min 54), validation Q3 not fully YES.
+Failing metrics: unit_economics 54, technical_feasibility 64. Watch-item — flips if component prices keep falling or a B2B anchor order lands.
+
+---
+
+## CANDIDATE-H: AquaPulse-MY — aquaculture pond brain SoC (DO/temp/pH AFE, aeration, auto-feeder)
+
+### 5 validation questions
+1. **Is the problem real, long-standing, and unsolved in Malaysia?** YES. USD 1B production value
+   (2023) [S74|T1], RM11.55B trade [S75|T2], 392.4kt brackishwater output [S76|T1]; DO crashes kill
+   ponds overnight; tools are industrial imports (OxyGuard class [S78|T1]) or handheld meters
+   [S79|T5]; no <RM150 multi-param pond controller exists.
+2. **Is there a credible buyer/payer channel?** YES (small). 10-25k intensively-managed ponds via
+   DOF-linked co-ops and aquaculture suppliers; the device SAM (RM0.7-1.8M) is the smallest of the
+   batch (market_fit 55).
+3. **Can the device retail < RM150 with a survivable margin?** MARGINAL — galvanic DO probe RM40-70
+   can breach the ceiling (BOM RM110-168); DO-probe-optional kit (BOM RM85-118) keeps margins
+   20-45% (unit_economics 58). Treated as not-YES for PASS purposes.
+4. **Can the SoC be built on sky130 with Verilog-2005 + AMBA 3-tier + analog/SRAM?** YES. High-Z probe
+   AFE + 12-bit SAR + MPPT + zero-cross designable [S34|T1]; digital spine proven; radio from
+   Candidate-A. Sensor chemistry stays in external probes.
+5. **Are regulatory/ecosystem hurdles bounded?** YES. SIRIM radio path known [S37|T3]; DOF extension
+   channel exists; no aquaculture-device certification burden.
+
+### Risk matrix
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Probe cost + lifetime | HIGH | HIGH | Probe-optional SKU; probe-agnostic AFE; volume sourcing |
+| Small device market in MYR | MED | HIGH | IP portability (agri D + industrial water) is the exit valve |
+| Farmer trust/tech adoption | MED | MED | DOF extension channels; demo ponds; harvest-saved pilots |
+| OxyGuard price-drop | LOW | MED | Their cost structure cannot follow to RM149 |
+| Pond-side ruggedization | MED | MED | IP65 enclosure; surge protection on relay lines |
+
+### Verdict: FAIL — composite 66.75 (< 70 floor), no dimension < 40 (min 55), validation Q3 not fully YES.
+Failing metrics: market_fit_size 55, unit_economics 58. Watch-item — strongest candidate to resurrect with a B2B/co-op anchor.
+
+---
+
+## CANDIDATE-I: ParkIQ-MY — in-ground parking occupancy sensor SoC for municipalities
+
+### 5 validation questions
+1. **Is the problem real, long-standing, and unsolved in Malaysia?** YES. KL motorists spend 25
+   min/day searching [S80|T3]; Penang's ANPR enforcement was halted after 7,000-10,000 violations/
+   month [S81|T2] — the data layer is missing; imports price at USD 100-300/bay [S83|T1, S84|T1].
+2. **Is there a credible buyer/payer channel?** YES (slow). Municipal tenders (12-18 month cycles),
+   private lot operators, PSP-style app operators [S82|T3]; the halted ANPR budgets are the wedge.
+3. **Can the device retail < RM150 with a survivable margin?** YES. BOM RM53-75 at RM129-149 (SoC
+   RM15-18, magnetometer RM8-12, battery RM10-15, potting/PCB RM12-18, radio RM8-12); margin 40-60%.
+4. **Can the SoC be built on sky130 with Verilog-2005 + AMBA 3-tier + analog/SRAM?** YES. Magnetometer
+   is a commodity I2C part; deep-sleep PMU + wake comparator designable [S34|T1]; 5-year battery is a
+   power-budget design problem, not a silicon risk; radio from Candidate-A.
+5. **Are regulatory/ecosystem hurdles bounded?** YES. SIRIM radio path known [S37|T3]; MAMPU
+   procurement is slow but standardized; privacy-by-design (no plates) avoids the ANPR backlash.
+
+### Risk matrix
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Municipal procurement cycles | MED | HIGH | Pilot-first strategy; private lot operators as fast channel |
+| Imported-sensor price war | MED | MED | Open RTL + local support + no-subscription mesh; TCO story |
+| In-ground deployment failure modes | MED | HIGH | Surface-mount option; potting quality; field-replacement design |
+| Radio coexistence in dense bays | MED | MED | Mesh TDMA from Candidate-A PHY; channel planning kit |
+| ANPR-style political backlash | LOW | HIGH | Position as data-for-drivers, never enforcement; no identity data |
+
+### Verdict: FAIL — composite 68.90 just below the 70 floor; no dimension < 40 (min 60); all 5 validation
+questions answer YES but the composite rule (>= 70) is not met — weakest dimensions (market 62,
+competition 60, differentiation 64) sit below batch-1 passing candidates.
+Failing metrics: market_fit_size 62, competition_gap 60, differentiation_novelty 64. One anchor municipal tender flips it.
+
+---
+
+## CANDIDATE-J: BusSafe-MY — school-bus child-presence safety SoC (tag + hub sweep protocol)
+
+### 5 validation questions
+1. **Is the problem real, long-standing, and unsolved in Malaysia?** YES — fatal and current. 5-year-
+   old died after ~5h in a Johor school van (Apr 2025) [S86|T2]; 4-year-old heatstroke death in a car
+   (Oct 2025) [S89|T2]; Gerik crash (Jun 2025) [S90|T5]. GPS trackers give location, not presence
+   [S91|T3]; car-native systems don't fit vans or budgets [S93|T1]; academic prototypes are papers
+   [S92|T2].
+2. **Is there a credible buyer/payer channel?** YES. Regulation is the demand generator: Johor set
+   van SOPs right after the death [S87|T2]; APAD/JPJ already mandate GPS for buses (compliance
+   budget lines exist) [S91|T3]; operators, private schools, and state transport departments buy.
+3. **Can the device retail < RM150 with a survivable margin?** YES. Hub BOM RM61-87 at RM139 (margin
+   37-56%); tags BOM RM12-18 at RM19-29 (margin 30-55%); RM250-450 total per van.
+4. **Can the SoC be built on sky130 with Verilog-2005 + AMBA 3-tier + analog/SRAM?** YES — highest
+   feasibility of the batch. Seat AFE is comparators + SAR ADC (sky130); radio reuses Candidate-A
+   Sub-GHz digital PHY with external RF FE; all digital blocks proven (IP index T1). 3-tier AMBA
+   justified (tag-sweep streaming on AHB, control on APB).
+5. **Are regulatory/ecosystem hurdles bounded?** YES — regulation HELPS here. SIRIM radio path known
+   [S37|T3]; SOP mandates + APAD/JPJ framework are tailwinds, not burdens.
+
+### Risk matrix
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Operator cost resistance | MED | HIGH | Regulation-driven demand (SOPs [S87|T2]); RM250-450 vs one death's liability; insurance discounts |
+| Tag loss/durability | MED | MED | Sub-RM5 tag economics; seat-sensor fallback works without tags |
+| False alarms erode trust | MED | HIGH | Sweep protocol with driver-confirm step; per-vehicle sensitivity tuning |
+| Mandate may not arrive | MED | MED | Johor SOPs already exist [S87|T2]; sell to liability-aware operators + parents |
+| Radio coexistence on buses | LOW | MED | Short-range FSK burst; Candidate-A PHY with TDMA |
+
+### Verdict: PASS — composite 73.20 (>= 70), no dimension < 40, all 5 validation questions YES.
+Failing metrics: none. Strongest batch-2 candidate and new overall top scorer across all 10.
+
+---
+
+## Aggregate (all 10)
+| Rank | Candidate | Composite | Verdict | Position |
+|---|---|---|---|---|
+| 1 | **CANDIDATE-J: BusSafe-MY** — school-bus child-presence SoC | **73.20** | PASS | LOW-POWER (tag/hub) |
+| 2 | CANDIDATE-A: BanjirSense-MY — flood early-warning node SoC | 72.15 | PASS | LOW-POWER |
+| 3 | CANDIDATE-C: EVCore-MY — EV charger controller SoC | 71.60 | PASS | HIGH-PERFORMANCE |
+| 4 | CANDIDATE-E: SolarSync-MY — solar self-consumption optimizer SoC | 71.45 | PASS | HIGH-PERFORMANCE |
+| 5 | CANDIDATE-F: HazeGuard-MY — indoor AQI/CO2 monitor SoC | 70.90 | PASS | LOW-POWER |
+| 6 | CANDIDATE-B: JagaCare-MY — elderly aging-in-place monitor SoC | 70.85 | PASS | LOW-POWER |
+| 7 | CANDIDATE-I: ParkIQ-MY — parking occupancy sensor SoC | 68.90 | FAIL | LOW-POWER |
+| 8 | CANDIDATE-D: AgriCore-MY — fertigation controller SoC | 67.20 | FAIL | LOW-POWER |
+| 9 | CANDIDATE-H: AquaPulse-MY — aquaculture pond brain SoC | 66.75 | FAIL | LOW-POWER |
+| 10 | CANDIDATE-G: HomeEye-MY — video doorbell SoC | 66.60 | FAIL | HIGH-PERFORMANCE |
+
+- Recommended winner across all 10: **CANDIDATE-J BusSafe-MY (73.20)** — live regulatory moment
+  (Johor SOPs after the 2025 van death [S86|T2, S87|T2]), highest batch-2 feasibility (Sub-GHz radio
+  IP reused from A), healthy margins (hub 37-56%, tags 30-55%), reusable tag/hub IP. Batch-1 winner
+  A (72.15) remains co-finalist on problem scale (RM0.6-6B/yr flood losses) and govt co-buyer channel.
+- All ten verdicts are derivable bottom-to-top from candidates_scores.json (evidence -> normalized
+  score -> weighted composite -> PASS/FAIL); composite math verified programmatically.
+- Batch-2 FAILs (D 67.20, G 66.60, H 66.75, I 68.90) have no dimension below 40 — they are honest
+  composites under the 70 floor and remain watch-items, not dead ends.
+- Every verdict is a binary PASS/FAIL per the scoring rule; no graded/qualified verdicts exist in this stage.
